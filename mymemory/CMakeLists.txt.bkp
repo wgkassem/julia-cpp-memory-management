@@ -1,0 +1,85 @@
+cmake_minimum_required(VERSION 3.5)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+set(CMAKE_DISABLE_SOURCE_CHANGES ON)
+set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
+
+project(mymemory VERSION 0.1.0 LANGUAGES CXX)
+
+# configure a header file to pass some of the CMake settings
+# to the source code
+configure_file(
+        "${PROJECT_SOURCE_DIR}/config.h.in"
+        "${PROJECT_BINARY_DIR}/config.h"
+        @ONLY
+)
+
+# set build options for this project 
+option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+option(BUILD_TESTING "Build tests" ON)
+
+# set cmake module path
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
+
+# include GNUInstallDirs to get standard installation directories
+include(GNUInstallDirs)
+include(CTest)
+if (BUILD_TESTING)
+    find_package(GoogleTest REQUIRED)
+    enable_testing()
+endif()
+
+
+# this is a header-only library so we just need to specify the include directory
+add_library(mymemory INTERFACE)
+target_include_directories(mymemory INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+
+# install the library and the header files
+install(TARGETS mymemory EXPORT mymemory_EXPORTS
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        NAMELINK_SKIP
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        )
+
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+# install the cmake config files
+install(EXPORT mymemory_EXPORTS
+        NAMESPACE mymemory::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/mymemory-${PROJECT_VERSION}
+        )
+
+if (BUILD_TESTING)
+  add_subdirectory(tests)
+endif()
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+        "${PROJECT_SOURCE_DIR}/cmake/mymemory-config.cmake.in"
+        "${PROJECT_BINARY_DIR}/mymemory-config.cmake"
+        INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/mymemory
+)
+
+write_basic_package_version_file(
+        "${PROJECT_BINARY_DIR}/mymemory-config-version.cmake"
+        VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}
+        COMPATIBILITY AnyNewerVersion
+)
+
+install(FILES
+        "${PROJECT_BINARY_DIR}/mymemory-config.cmake"
+        "${PROJECT_BINARY_DIR}/mymemory-config-version.cmake"
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/mymemory-${PROJECT_VERSION}
+        )
+
+# install headers
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+# install targets to trigger exports 
+install(TARGETS mymemory) 
+
+

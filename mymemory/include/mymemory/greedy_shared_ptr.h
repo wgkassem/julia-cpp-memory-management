@@ -16,6 +16,7 @@
 // greedy_shared_ptr, it is clear that the greedy_shared_ptr owns the raw
 // pointer.
 
+namespace mymemory {
 template <typename T> class greedy_shared_ptr : public my_shared_ptr<T> {
 
 public:
@@ -29,3 +30,4 @@ public:
   }; // overrides my_shared_ptr &operator=(T *ptr)
 
 }; // class greedy_shared_ptr
+} // namespace mymemory

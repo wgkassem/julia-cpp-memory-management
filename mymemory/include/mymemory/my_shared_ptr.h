@@ -7,6 +7,7 @@
 // my_shared_ptr is a smart pointer that retains shared ownership of an object
 // through a pointer. it also has an assignment operator that accepts a raw
 // pointer similar to constructor.
+namespace mymemory {
 template <typename T> class my_shared_ptr : public std::shared_ptr<T> {
 
 private:
@@ -82,6 +83,12 @@ public:
   // Get the raw pointer
   T *get() const { return _ptr; }
 
+  // Conversion operator
+  operator T *() const { return _ptr; }
+
+  bool operator==(std::nullptr_t ptr) const { return _ptr == ptr; }
+  bool operator!=(std::nullptr_t ptr) const { return _ptr != ptr; }
+
   // Get count
   size_t get_count() const {
     if (_count != nullptr)
@@ -103,3 +110,4 @@ public:
 
   my_shared_ptr &operator=(const T *ptr) = delete;
 };
+} // namespace mymemory
